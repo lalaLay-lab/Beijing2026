@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beijing 7-Day Cute Travel & Food Plan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #FFF8F0;
+        }
+        .cute-card {
+            box-shadow: 0 8px 0px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s ease;
+        }
+        .check-item {
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+        .check-item:hover {
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+        .check-item.checked .item-text {
+            text-decoration: line-through;
+            opacity: 0.55;
+        }
+        .check-box {
+            width: 18px;
+            height: 18px;
+            border-radius: 6px;
+            border: 2px solid #F43F5E;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: white;
+            transition: all 0.15s ease;
+            margin-top: 2px;
+        }
+        .check-item.checked .check-box {
+            background: #F43F5E;
+            color: white;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .tab-btn {
+            transition: all 0.15s ease;
+        }
+        .tab-btn.active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(244, 63, 94, 0.2);
+        }
+        .photo-slot {
+            position: relative;
+            cursor: pointer;
+        }
+        .photo-slot:hover .photo-badge {
+            background-color: #F43F5E;
+            color: white;
+        }
+    </style>
+</head>
+<body class="p-3 sm:p-6 flex flex-col items-center min-h-screen">
+
+    <!-- Top Control Bar -->
+    <div class="w-full max-w-4xl flex flex-wrap justify-between items-center gap-3 mb-3 bg-white p-3 rounded-2xl shadow-sm border-2 border-amber-200">
+        <div class="flex flex-col gap-0.5 text-amber-900 text-xs sm:text-sm">
+            <div class="flex items-center gap-2 font-semibold">
+                <span id="sync-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+                <span id="sync-status">กำลังเชื่อมต่อระบบ...</span>
+            </div>
+            <div class="text-[11px] text-stone-500">
+                รหัสผู้ใช้: <span id="user-id-display" class="font-mono text-stone-700 select-all">Offline / Local</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="openResetModal()" class="bg-stone-100 hover:bg-stone-200 text-stone-600 font-medium px-3 py-2 rounded-xl transition text-xs sm:text-sm cursor-pointer">
+                <span>🔄 รีเซ็ต</span>
+            </button>
+            <button id="downloadBtn" onclick="downloadPoster()" class="bg-rose-500 hover:bg-rose-600 active:scale-95 text-white font-semibold px-4 py-2 rounded-xl shadow-md transition flex items-center gap-2 text-xs sm:text-sm cursor-pointer">
+                <span>📸 บันทึกภาพหน้านี้ (PNG)</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Custom Confirm Modal for Reset -->
+    <div id="reset-modal" class="fixed inset-0 bg-black/40 backdrop-blur-xs hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full border-2 border-rose-200 shadow-xl text-center">
+            <div class="text-3xl mb-2">⚠️</div>
+            <h3 class="font-bold text-stone-800 text-lg mb-1">รีเซ็ตเช็กลิสต์ทั้งหมด?</h3>
+            <p class="text-xs sm:text-sm text-stone-600 mb-5">การกดยืนยันจะล้างข้อมูลการเช็กอินทั้งหมด</p>
+            <div class="flex gap-2 justify-center">
+                <button onclick="closeResetModal()" class="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold py-2.5 rounded-xl text-sm cursor-pointer">ยกเลิก</button>
+                <button onclick="confirmResetChecklist()" class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold py-2.5 rounded-xl text-sm cursor-pointer">ยืนยันรีเซ็ต</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Day Navigation Tabs -->
+    <div class="w-full max-w-4xl mb-4">
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 px-1">
+            <button onclick="switchTab('day1')" data-tab="day1" class="tab-btn active flex-shrink-0 bg-emerald-500 text-white font-bold px-4 py-2 rounded-2xl text-xs sm:text-sm border-2 border-emerald-600 cursor-pointer">
+                🟢 Day 1 (23 ธ.ค.)
+            </button>
+            <button onclick="switchTab('day2')" data-tab="day2" class="tab-btn flex-shrink-0 bg-white text-stone-700 hover:bg-orange-50 font-bold px-4 py-2 rounded-2xl text-xs sm:text-sm border-2 border-orange-200 cursor-pointer">
+                🟠 Day 2 (24 ธ.ค.)
+            </button>
+            <button onclick="switchTab('day3')" data-tab="day3" class="tab-btn flex-shrink-0 bg-white text-stone-700 hover:bg-sky-50 font-bold px-4 py-2 rounded-2xl text-xs sm:text-sm border-2 border-sky-200 cursor-pointer">
+                🔵 Day 3 (25 ธ.ค.)
+            </button>
+            <button onclick="switchTab('day4')" data-tab="day4" class="tab-btn flex-shrink-0 bg-white text-stone-700 hover:bg-purple-50 font-bold px-4 py-2 rounded-2xl text-xs sm:text-sm border-2 border-purple-200 cursor-pointer">
+                🟣 Day 4 (26 ธ.ค.)
+            </button>
+            <button onclick="switchTab('day5')" data-tab="day5" class="tab-btn flex-shrink-0 bg-white text-stone-700 hover:bg-rose-50 font-bold px-4 py-2 rounded-2xl text-xs sm:text-sm border-2 border-rose-200 cursor-pointer">
+                🔴 Day 5 (27 ธ.ค.)
+            </button>
+            <button onclick="switchTab('day6')" data-tab="day6" class="tab-btn flex-shrink-0 bg-white text-stone-700 hover:bg-amber-50 font-bold px-4 py-2 rounded-2xl text-xs sm:text-sm border-2 border-amber-200 cursor-pointer">
+                🟡 Day 6 (28 ธ.ค.)
+            </button>
+            <button onclick="switchTab('day7')" data-tab="day7" class="tab-btn flex-shrink-0 bg-white text-stone-700 hover:bg-pink-50 font-bold px-4 py-2 rounded-2xl text-xs sm:text-sm border-2 border-pink-200 cursor-pointer">
+                🩷 Day 7 (29 ธ.ค.)
+            </button>
+            <button onclick="switchTab('history')" data-tab="history" class="tab-btn flex-shrink-0 bg-white text-rose-700 hover:bg-rose-50 font-bold px-4 py-2 rounded-2xl text-xs sm:text-sm border-2 border-rose-300 cursor-pointer">
+                📜 History (<span id="tab-history-count">0</span>)
+            </button>
+            <button onclick="switchTab('all')" data-tab="all" class="tab-btn flex-shrink-0 bg-white text-stone-700 hover:bg-stone-100 font-bold px-4 py-2 rounded-2xl text-xs sm:text-sm border-2 border-stone-300 cursor-pointer">
+                📋 ดูรวมทุกวัน
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Poster Canvas -->
+    <div id="poster-area" class="w-full max-w-4xl bg-[#FFFDF9] rounded-[2.5rem] p-5 sm:p-8 border-4 border-[#FFD6A5] shadow-xl relative overflow-hidden">
+        
+        <!-- Decorative Corner Elements -->
+        <div class="absolute -top-6 -left-6 w-24 h-24 bg-rose-100 rounded-full opacity-60 pointer-events-none"></div>
+        <div class="absolute -top-4 -right-4 w-28 h-28 bg-amber-100 rounded-full opacity-60 pointer-events-none"></div>
+        <div class="absolute -bottom-8 -right-8 w-32 h-32 bg-teal-100 rounded-full opacity-60 pointer-events-none"></div>
+
+        <!-- Header Banner -->
+        <div class="text-center relative z-10 mb-6">
+            <div class="inline-flex items-center gap-2 bg-rose-100 text-rose-700 px-4 py-1 rounded-full text-xs sm:text-sm font-semibold mb-2 border border-rose-200">
+                <span>✈️ 23 – 29 DEC</span>
+                <span>•</span>
+                <span>WINTER TRIP IN CHINA</span>
+            </div>
+            <h1 class="text-2xl sm:text-4xl font-bold text-stone-800 tracking-tight flex items-center justify-center gap-2 flex-wrap">
+                <span>🐼</span>
+                <span class="bg-gradient-to-r from-rose-500 via-amber-500 to-orange-500 bg-clip-text text-transparent">BEIJING & TIANJIN</span>
+                <span>🏮</span>
+            </h1>
+            <p class="text-stone-600 font-medium text-xs sm:text-base mt-1">
+                แผนเที่ยว 7 วันสุดคิ้วท์ ตะลุยแลนด์มาร์ก & เก็บครบทุกร้านเด็ด คาเฟ่ และของฝากปักกิ่ง!
+            </p>
+            <!-- Progress Pill -->
+            <div class="mt-3 inline-flex items-center gap-3 bg-white px-4 py-1.5 rounded-full border-2 border-amber-200 shadow-sm">
+                <span class="text-xs font-bold text-stone-700">🎯 ความคืบหน้า:</span>
+                <div class="w-28 sm:w-40 h-2.5 bg-amber-100 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="h-full bg-gradient-to-r from-rose-400 to-amber-400 transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <span id="progress-text" class="text-xs font-bold text-rose-600">0/0</span>
+            </div>
+        </div>
+
+        <!-- DAY CARDS CONTAINER -->
+        <div class="space-y-5 relative z-10">
+
+            <!-- DAY 1 -->
+            <div id="section-day1" class="day-section cute-card bg-[#ECFDF5] border-2 border-[#A7F3D0] rounded-3xl p-4 sm:p-6">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-emerald-500 text-white font-bold px-3 py-1 rounded-full text-xs sm:text-sm shadow-sm">🟢 DAY 1 • พุธ 23 ธ.ค.</span>
+                        <span class="font-bold text-emerald-900 text-base sm:text-xl">ถึงปักกิ่ง ➔ หวังฝูจิ่ง (Wangfujing)</span>
+                    </div>
+                    <span class="text-xl">✈️ ➔ 🦆 ➔ 🥜</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-stretch">
+                    <div class="md:col-span-6 bg-white/85 rounded-2xl p-3.5 border border-emerald-200">
+                        <div class="text-xs sm:text-sm font-bold text-emerald-700 mb-2">🚇 เช็กลิสต์สถานที่ & การเดินทาง (ไป–กลับที่พัก)</div>
+                        <ul class="text-xs sm:text-sm text-stone-700 space-y-2 leading-relaxed">
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d1-t1" data-day="Day 1 (23 ธ.ค.)" data-title="ถึงสนามบิน PEK ➔ Airport Express เข้าเมืองเช็กอินที่พัก">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text"><b>เข้าเมือง:</b> PEK ➔ <b>Airport Express</b> ลง <i>Dongzhimen / Beixinqiao</i> ต่อรถไฟไป <b>เช็กอินที่พัก</b></span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d1-t2" data-day="Day 1 (23 ธ.ค.)" data-title="เดินเล่นย่านหวังฝูจิ่ง (Wangfujing Night Market & Light Street)">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text"><b>หวังฝูจิ่ง:</b> สาย 1/8 ลง <b>Wangfujing</b> (ทางออก <b>E3</b> APM / <b>C3</b> in88) เดินเล่น Night Market</span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d1-t3" data-day="Day 1 (23 ธ.ค.)" data-title="นั่งรถไฟใต้ดินสาย 5/1 กลับที่พัก (คืนที่ 1)">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text"><b>กลับที่พัก:</b> สาย 5 <b>Dengshikou (ทางออก A)</b> ➔ ขากลับขึ้นสาย 5/1 กลับที่พัก</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="md:col-span-6 bg-white rounded-2xl p-3.5 border border-emerald-200">
+                        <div class="text-xs sm:text-sm font-bold text-rose-600 mb-2">🍽️ เช็กลิสต์พิกัดของกิน & ของฝากตามทาง</div>
+                        <ul class="text-xs sm:text-sm text-stone-700 space-y-2">
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d1-f1" data-day="Day 1 (23 ธ.ค.)" data-title="☕ Starbucks Reserve (สนามบิน PEK)">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">☕ <b>เช้า:</b> Starbucks Reserve (PEK)</span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d1-f2" data-day="Day 1 (23 ธ.ค.)" data-title="🍜 山西刀削面 / Green Tea (in88) / Feidachu (APM)">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">🍜 <b>เที่ยง:</b> 山西刀削面 / <i>Green Tea (in88) / Feidachu (APM)</i></span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d1-f3" data-day="Day 1 (23 ธ.ค.)" data-title="🦆 เป็ดปักกิ่ง Siji Minfu (四季民福) + More Yogurt">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">🦆 <b>เย็น:</b> <b>เป็ดปักกิ่ง Siji Minfu (四季民福)</b> + More Yogurt (in88 ชั้น B1)</span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d1-f4" data-day="Day 1 (23 ธ.ค.)" data-title="🥜 ร้านถั่วอบ APM ชั้น 5 (พีแคน, ข้าวโพดอบกรอบ, ส้มเคลือบไวท์ช็อกฯ) & ทาร์ตไข่ยาว 60 ซม.">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">🥜 <b>ของว่าง/ฝาก:</b> <b>ร้านถั่วอบ APM ชั้น 5</b> (ติดบันไดเลื่อนฝั่ง WOW COLOUR: พีแคน, ข้าวโพดกรอบ, ส้มไวท์ช็อกฯ) & <b>ทาร์ตไข่ยาว 60 ซม.</b></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Visual Landmarks & Food Gallery Day 1 -->
+                <div class="mt-3.5 bg-white/95 rounded-2xl p-3 border border-emerald-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-xs font-bold text-emerald-800">📸 ภาพจำสถานที่ & อาหารเด่น (แตะที่รูปเพื่อใส่รูปจากเครื่อง)</div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <div onclick="triggerPhotoUpload('d1-p1')" class="photo-slot flex items-center gap-2.5 bg-emerald-50/70 p-2 rounded-xl border border-emerald-100 hover:border-emerald-300 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d1-p1" src="https://commons.wikimedia.org/wiki/Special:FilePath/Wangfujing_Street_at_night_(20190814211028).jpg?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/064E3B/FEF3C7?text=Wangfujing';" alt="Wangfujing Street" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-emerald-200">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">ถนนคนเดินหวังฝูจิ่ง</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">ตึกจีนโบราณคู่ห้างหรู APM & in88 ประดับไฟนีออนคึกคักยามค่ำ</div>
+                            </div>
+                        </div>
+                        <div onclick="triggerPhotoUpload('d1-p2')" class="photo-slot flex items-center gap-2.5 bg-amber-50/70 p-2 rounded-xl border border-amber-100 hover:border-amber-300 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d1-p2" src="https://commons.wikimedia.org/wiki/Special:FilePath/Peking_Duck_01.jpg?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/9A3412/FFFBEB?text=Peking+Duck';" alt="Peking Duck" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-amber-200">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">เป็ดปักกิ่ง Siji Minfu</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">เชฟแล่หนังเป็ดสีน้ำตาลแดงกรอบเงา เสิร์ฟคู่แผ่นแป้งและซอสหวาน</div>
+                            </div>
+                        </div>
+                        <div onclick="triggerPhotoUpload('d1-p3')" class="photo-slot flex items-center gap-2.5 bg-rose-50/70 p-2 rounded-xl border border-rose-100 hover:border-rose-300 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d1-p3" src="https://commons.wikimedia.org/wiki/Special:FilePath/Egg_tart_in_Hong_Kong.jpg?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/BE123C/FFF1F2?text=60cm+Egg+Tart';" alt="Egg Tart" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-rose-200">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">ทาร์ตไข่ 60 ซม. & ถั่วอบ</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">พัฟทาร์ตไข่ยาวพิเศษในกล่องหูหิ้ว & ถั่วพีแคน/ข้าวโพดอบกรอบ APM</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-end single-day-nav">
+                    <button onclick="switchTab('day2')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-xl shadow-sm cursor-pointer">
+                        ไปต่อ Day 2 (24 ธ.ค.) ➔
+                    </button>
+                </div>
+            </div>
+
+            <!-- DAY 2 -->
+            <div id="section-day2" class="day-section hidden cute-card bg-[#FFF7ED] border-2 border-[#FED7AA] rounded-3xl p-4 sm:p-6">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-orange-500 text-white font-bold px-3 py-1 rounded-full text-xs sm:text-sm shadow-sm">🟠 DAY 2 • พฤหัส 24 ธ.ค.</span>
+                        <span class="font-bold text-orange-900 text-base sm:text-xl">Universal Studios Beijing</span>
+                    </div>
+                    <span class="text-xl">🧙‍♂️ ➔ 🦖 ➔ 🎄</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-stretch">
+                    <div class="md:col-span-6 bg-white/85 rounded-2xl p-3.5 border border-orange-200">
+                        <div class="text-xs sm:text-sm font-bold text-orange-700 mb-2">🚇 เช็กลิสต์สถานที่ & การเดินทาง (ไป–กลับที่พัก)</div>
+                        <ul class="text-xs sm:text-sm text-stone-700 space-y-2 leading-relaxed">
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d2-t1" data-day="Day 2 (24 ธ.ค.)" data-title="Universal Studios Beijing (โซน Harry Potter & Jurassic World)">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text"><b>ขาไปจากที่พัก:</b> สาย 1 (Batong) / สาย 7 ลง <b>Universal Resort (ทางออก B/C/D)</b> ลุยโซนแฮร์รี่ & ไดโนเสาร์</span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d2-t2" data-day="Day 2 (24 ธ.ค.)" data-title="เดินเล่น CityWalk ชมต้นคริสต์มาส ➔ นั่งรถไฟกลับที่พัก">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text"><b>CityWalk & กลับที่พัก:</b> ชมต้นคริสต์มาส ➔ ขึ้นรถไฟที่สถานีเดิม (ก่อน 22:30 น.) ย้อนกลับที่พัก</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="md:col-span-6 bg-white rounded-2xl p-3.5 border border-orange-200">
+                        <div class="text-xs sm:text-sm font-bold text-rose-600 mb-2">🍽️ เช็กลิสต์พิกัดของกินตามทาง</div>
+                        <ul class="text-xs sm:text-sm text-stone-700 space-y-2">
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d2-f1" data-day="Day 2 (24 ธ.ค.)" data-title="☕ Seesaw Coffee">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">☕ <b>เช้า:</b> Seesaw Coffee</span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d2-f2" data-day="Day 2 (24 ธ.ค.)" data-title="🍗 The Three Broomsticks (โซนแฮร์รี่ พอตเตอร์)">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">🍗 <b>เที่ยง:</b> <b>The Three Broomsticks</b> (โซนพ่อมด)</span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d2-f3" data-day="Day 2 (24 ธ.ค.)" data-title="🍫 Toothsome Chocolate Emporium (CityWalk)">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">🍫 <b>เย็น:</b> <b>Toothsome Chocolate Emporium</b> (CityWalk)</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Visual Landmarks & Food Gallery Day 2 -->
+                <div class="mt-3.5 bg-white/95 rounded-2xl p-3 border border-orange-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-xs font-bold text-orange-800">📸 ภาพจำสถานที่ & อาหารเด่น (แตะที่รูปเพื่อใส่รูปจากเครื่อง)</div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <div onclick="triggerPhotoUpload('d2-p1')" class="photo-slot flex items-center gap-2.5 bg-sky-50/70 p-2 rounded-xl border border-sky-100 hover:border-sky-300 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d2-p1" src="https://commons.wikimedia.org/wiki/Special:FilePath/Universal_Studios_Beijing_globe_20210920.jpg?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/0284C7/FFFFFF?text=Universal+Beijing';" alt="Universal Studios Beijing" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-sky-200">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">ลูกโลก Universal & ปราสาท</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">จุดถ่ายรูปลูกโลกหมุนหน้าทางเข้า & ปราสาทฮอกวอตส์หิมะปกคลุม</div>
+                            </div>
+                        </div>
+                        <div onclick="triggerPhotoUpload('d2-p2')" class="photo-slot flex items-center gap-2.5 bg-amber-50/70 p-2 rounded-xl border border-amber-100 hover:border-amber-300 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d2-p2" src="https://commons.wikimedia.org/wiki/Special:FilePath/Butterbeer_at_Universal_Studios_Japan.jpg?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/B45309/FEF3C7?text=Butterbeer';" alt="Butterbeer" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-amber-200">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">The Three Broomsticks</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">ชุดซี่โครงหมู/ไก่อบจานยักษ์ และแก้วบัตเตอร์เบียร์ฟองครีมนุ่ม</div>
+                            </div>
+                        </div>
+                        <div onclick="triggerPhotoUpload('d2-p3')" class="photo-slot flex items-center gap-2.5 bg-pink-50/70 p-2 rounded-xl border border-pink-100 hover:border-pink-300 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d2-p3" src="https://commons.wikimedia.org/wiki/Special:FilePath/Toothsome_Chocolate_Emporium_%26_Savory_Feast_Kitchen_(30106205212).jpg?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/9D174D/FCE7F3?text=Toothsome';" alt="Toothsome Chocolate Emporium" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-pink-200">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">Toothsome Chocolate</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">มิลค์เชคแก้วโตท็อปปิ้งโดนัท/วิปครีมล้นแก้ว ในโซน CityWalk</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-between single-day-nav">
+                    <button onclick="switchTab('day1')" class="bg-white hover:bg-orange-100 text-orange-800 border border-orange-300 text-xs sm:text-sm font-bold px-4 py-2 rounded-xl cursor-pointer">
+                        ⬅ ย้อนกลับ Day 1
+                    </button>
+                    <button onclick="switchTab('day3')" class="bg-orange-500 hover:bg-orange-600 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-xl shadow-sm cursor-pointer">
+                        ไปต่อ Day 3 (25 ธ.ค.) ➔
+                    </button>
+                </div>
+            </div>
+
+            <!-- DAY 3 -->
+            <div id="section-day3" class="day-section hidden cute-card bg-[#F0F9FF] border-2 border-[#BAE6FD] rounded-3xl p-4 sm:p-6">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-sky-500 text-white font-bold px-3 py-1 rounded-full text-xs sm:text-sm shadow-sm">🔵 DAY 3 • ศุกร์ 25 ธ.ค.</span>
+                        <span class="font-bold text-sky-900 text-base sm:text-xl">เมืองเก่า – เฉียนเหมิน ➔ ซานหลี่ถุน (Sanlitun)</span>
+                    </div>
+                    <span class="text-xl">🏯 ➔ 🥛 ➔ 🧋</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-stretch">
+                    <div class="md:col-span-6 bg-white/85 rounded-2xl p-3.5 border border-sky-200">
+                        <div class="text-xs sm:text-sm font-bold text-sky-700 mb-2">🚇 เช็กลิสต์สถานที่ & การเดินทาง (ไป–กลับที่พัก)</div>
+                        <ul class="text-xs sm:text-sm text-stone-700 space-y-2 leading-relaxed">
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d3-t1" data-day="Day 3 (25 ธ.ค.)" data-title="จัตุรัสเทียนอันเหมิน ➔ พระราชวังต้องห้าม ➔ สวนจิ่งซาน">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text"><b>จากที่พักไปวัง:</b> สาย 1 ลง <b>Tian'anmen East (ทางออก A/B)</b> ➔ เดินทะลุวังออกประตูเหนือ ➔ <b>สวนจิ่งซาน</b></span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d3-t2" data-day="Day 3 (25 ธ.ค.)" data-title="เดินเล่นถนนคนเดิน Qianmen Street & สวนริมน้ำ Sanlihe Park">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text"><b>โซนเฉียนเหมิน & ซานหลี่เหอ:</b> สาย 2/8 ลง <b>Qianmen (ทางออก I/C)</b> เดินถนนคนเดิน & สวน <b>Sanlihe Park</b></span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d3-t3" data-day="Day 3 (25 ธ.ค.)" data-title="เดินเล่น Sanlitun Soho & Bar Street ➔ นั่งรถไฟกลับที่พัก">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text"><b>ซานหลี่ถุน & กลับที่พัก:</b> สาย 8/6 ต่อสาย 10 ลง <b>Tuanjiehu (ทางออก A)</b> ➔ ขากลับขึ้นสาย 10 กลับที่พัก</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="md:col-span-6 bg-white rounded-2xl p-3.5 border border-sky-200">
+                        <div class="text-xs sm:text-sm font-bold text-rose-600 mb-2">🍽️ เช็กลิสต์พิกัดของกิน คาเฟ่ & ชาฮิตตามทาง</div>
+                        <ul class="text-xs sm:text-sm text-stone-700 space-y-2">
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d3-f1" data-day="Day 3 (25 ธ.ค.)" data-title="🥐 Manner Coffee / Beijing Pie / VOYAGE COFFEE (Sanlihe Park)">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">🥐 <b>เช้า/คาเฟ่:</b> Manner Coffee / <i>Beijing Pie</i> / <b>VOYAGE COFFEE</b> (ริมน้ำ Sanlihe Park)</span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d3-f2" data-day="Day 3 (25 ธ.ค.)" data-title="🥛 โยเกิร์ตปักกิ่ง 奶皮子酸奶 (Ziguangyuan) + ขนม Daoxiangcun & น้ำโต้วจือ (Qianmen)">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">🥛 <b>เฉียนเหมิน:</b> Corner Tower Cafe / <b>โยเกิร์ต 奶皮子酸奶 (Ziguangyuan)</b>, ขนมจีน <b>Daoxiangcun / Nutland</b>, ขนมจีบ <b>Duyichu</b> & <b>น้ำโต้วจือ (豆汁)</b></span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d3-f3" data-day="Day 3 (25 ธ.ค.)" data-title="🧋 Ah Ma Handmade (นมเผือก) & HEYTEA Black (Sanlitun)">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">🧋 <b>ชาฮิตซานหลี่ถุน:</b> <b>Ah Ma Handmade</b> (นมเผือกละมุน) & <b>HEYTEA Black</b> (ชาใสขวด)</span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d3-f4" data-day="Day 3 (25 ธ.ค.)" data-title="🍲 Hu Tea House Hotpot (壶·茶馆火锅) ซานหลี่ถุน">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">🍲 <b>เย็น:</b> <b>Hu Tea House Hotpot (壶·茶馆火锅)</b> ซานหลี่ถุน</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Visual Landmarks & Food Gallery Day 3 -->
+                <div class="mt-3.5 bg-white/95 rounded-2xl p-3 border border-sky-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-xs font-bold text-sky-800">📸 ภาพจำสถานที่ & อาหารเด่น (แตะที่รูปเพื่อใส่รูปจากเครื่อง)</div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <div onclick="triggerPhotoUpload('d3-p1')" class="photo-slot flex items-center gap-2.5 bg-red-50/70 p-2 rounded-xl border border-red-100 hover:border-red-300 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d3-p1" src="https://commons.wikimedia.org/wiki/Special:FilePath/Forbidden_City_Beijing_Shenwumen_Gate.JPG?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/991B1B/FEF2F2?text=Forbidden+City';" alt="Forbidden City" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-red-200">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">พระราชวังต้องห้าม & เฉียนเหมิน</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">กำแพงสีแดงหลังคากระเบื้องทอง & คาเฟ่เรือนไม้ริมลำธาร Sanlihe</div>
+                            </div>
+                        </div>
+                        <div onclick="triggerPhotoUpload('d3-p2')" class="photo-slot flex items-center gap-2.5 bg-amber-50/70 p-2 rounded-xl border border-amber-100 hover:border-amber-300 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d3-p2" src="https://commons.wikimedia.org/wiki/Special:FilePath/Shaomai_in_Duyichu,_Beijing.jpg?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/92400E/FEF3C7?text=Duyichu+Shaomai';" alt="Shaomai Duyichu" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-amber-200">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">โยเกิร์ตปักกิ่ง & ขนมจีบ</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">ถ้วยเหลืองลายวังเนื้อแน่นหน้าครีมนม & ขนมจีบดอกไม้ Duyichu</div>
+                            </div>
+                        </div>
+                        <div onclick="triggerPhotoUpload('d3-p3')" class="photo-slot flex items-center gap-2.5 bg-purple-50/70 p-2 rounded-xl border border-purple-100 hover:border-purple-300 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d3-p3" src="https://commons.wikimedia.org/wiki/Special:FilePath/Sanlitun_Taikoo_Li_North_at_night_(20200926204008).jpg?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/6B21A8/F3E8FF?text=Sanlitun';" alt="Sanlitun" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-purple-200">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">ซานหลี่ถุน & ชาฮิต/หม้อไฟ</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">นมเผือก Ah Ma, ชาใสขวด HEYTEA Black และหม้อไฟ 2 ช่อง</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-between single-day-nav">
+                    <button onclick="switchTab('day2')" class="bg-white hover:bg-sky-100 text-sky-800 border border-sky-300 text-xs sm:text-sm font-bold px-4 py-2 rounded-xl cursor-pointer">
+                        ⬅ ย้อนกลับ Day 2
+                    </button>
+                    <button onclick="switchTab('day4')" class="bg-sky-500 hover:bg-sky-600 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-xl shadow-sm cursor-pointer">
+                        ไปต่อ Day 4 (26 ธ.ค.) ➔
+                    </button>
+                </div>
+            </div>
+
+            <!-- DAY 4 -->
+            <div id="section-day4" class="day-section hidden cute-card bg-[#FAF5FF] border-2 border-[#E9D5FF] rounded-3xl p-4 sm:p-6">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-purple-500 text-white font-bold px-3 py-1 rounded-full text-xs sm:text-sm shadow-sm">🟣 DAY 4 • เสาร์ 26 ธ.ค.</span>
+                        <span class="font-bold text-purple-900 text-base sm:text-xl">กำแพงเมืองจีน ➔ ถนนกุ่ยเจีย</span>
+                    </div>
+                    <span class="text-xl">🚡 ➔ 🧱 ➔ 🦞</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-stretch">
+                    <div class="md:col-span-6 bg-white/85 rounded-2xl p-3.5 border border-purple-200">
+                        <div class="text-xs sm:text-sm font-bold text-purple-700 mb-2">🚇 เช็กลิสต์สถานที่ & การเดินทาง (ไป–กลับที่พัก)</div>
+                        <ul class="text-xs sm:text-sm text-stone-700 space-y-2 leading-relaxed">
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d4-t1" data-day="Day 4 (26 ธ.ค.)" data-title="กำแพงเมืองจีนด่านมู่เทียนยวี่ (กระเช้าหอ 14 ➔ เดินถึงหอ 6 ➔ สไลเดอร์)">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text"><b>จากที่พักไปกำแพง:</b> ลง <b>Dongzhimen (ทางออก B1/H)</b> ต่อบัส <b>916 快</b> ➔ ขึ้นกระเช้าหอ 14 & ลงสไลเดอร์</span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d4-t2" data-day="Day 4 (26 ธ.ค.)" data-title="เดินเล่นถนนกุ่ยเจีย (Guijie) ➔ นั่งรถไฟกลับที่พัก">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text"><b>กุ่ยเจีย & กลับที่พัก:</b> กลับลง <b>Dongzhimen (ทางออก A)</b> ➔ ขากลับขึ้นสาย 5 <i>Beixinqiao</i> หรือสาย 2 กลับที่พัก</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="md:col-span-6 bg-white rounded-2xl p-3.5 border border-purple-200">
+                        <div class="text-xs sm:text-sm font-bold text-rose-600 mb-2">🍽️ เช็กลิสต์พิกัดของกินตามทาง</div>
+                        <ul class="text-xs sm:text-sm text-stone-700 space-y-2">
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d4-f1" data-day="Day 4 (26 ธ.ค.)" data-title="☕ Luckin Coffee (ตงจื๋อเหมิน)">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">☕ <b>เช้า:</b> Luckin Coffee (ตงจื๋อเหมิน)</span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d4-f2" data-day="Day 4 (26 ธ.ค.)" data-title="🍝 The Great Wall Cafe / Xinbeifang (มู่เทียนยวี่)">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">🍝 <b>เที่ยง:</b> The Great Wall Cafe / Xinbeifang</span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d4-f3" data-day="Day 4 (26 ธ.ค.)" data-title="🦞 กุ้งมังกรเล็กหม่าล่า 胡大饭店 Hu Da (ถนนกุ่ยเจีย)">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">🦞 <b>เย็น:</b> <b>胡大饭店 Hu Da</b> (ถึงก่อน 18:00) / <i>สำรอง: Feidachu</i></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Visual Landmarks & Food Gallery Day 4 -->
+                <div class="mt-3.5 bg-white/95 rounded-2xl p-3 border border-purple-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-xs font-bold text-purple-800">📸 ภาพจำสถานที่ & อาหารเด่น (แตะที่รูปเพื่อใส่รูปจากเครื่อง)</div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <div onclick="triggerPhotoUpload('d4-p1')" class="photo-slot flex items-center gap-2.5 bg-stone-100/80 p-2 rounded-xl border border-stone-200 hover:border-stone-400 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d4-p1" src="https://commons.wikimedia.org/wiki/Special:FilePath/20090529_Great_Wall_8185.jpg?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/334155/F8FAFC?text=Great+Wall';" alt="Mutianyu Great Wall" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-stone-300">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">กำแพงเมืองจีนมู่เทียนยวี่</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">ป้อมปราการหินทอดยาวตามสันเขา ขึ้นกระเช้าปิด & ลงรางสไลเดอร์</div>
+                            </div>
+                        </div>
+                        <div onclick="triggerPhotoUpload('d4-p2')" class="photo-slot flex items-center gap-2.5 bg-red-50/70 p-2 rounded-xl border border-red-100 hover:border-red-300 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d4-p2" src="https://commons.wikimedia.org/wiki/Special:FilePath/Guijie_Street_at_night.jpg?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/7F1D1D/FCA5A5?text=Guijie+Street';" alt="Guijie Street" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-red-200">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">ถนนโคมแดงกุ่ยเจีย</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">ถนนอาหารกลางคืนประดับโคมแดงนับพันดวงตลอดสองข้างทาง</div>
+                            </div>
+                        </div>
+                        <div onclick="triggerPhotoUpload('d4-p3')" class="photo-slot flex items-center gap-2.5 bg-orange-50/70 p-2 rounded-xl border border-orange-100 hover:border-orange-300 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d4-p3" src="https://commons.wikimedia.org/wiki/Special:FilePath/Spicy_crayfish_in_Beijing.jpg?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/9A3412/FFF7ED?text=Hu+Da+Crayfish';" alt="Spicy Crayfish" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-orange-200">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">กุ้งมังกรเล็กหม่าล่า Hu Da</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">กุ้งเครย์ฟิชผัดซอสพริกหม่าล่าสีแดงฉ่ำ เสิร์ฟเต็มถาด</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-between single-day-nav">
+                    <button onclick="switchTab('day3')" class="bg-white hover:bg-purple-100 text-purple-800 border border-purple-300 text-xs sm:text-sm font-bold px-4 py-2 rounded-xl cursor-pointer">
+                        ⬅ ย้อนกลับ Day 3
+                    </button>
+                    <button onclick="switchTab('day5')" class="bg-purple-500 hover:bg-purple-600 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-xl shadow-sm cursor-pointer">
+                        ไปต่อ Day 5 (27 ธ.ค.) ➔
+                    </button>
+                </div>
+            </div>
+
+            <!-- DAY 5 -->
+            <div id="section-day5" class="day-section hidden cute-card bg-[#FFF1F2] border-2 border-[#FECDD3] rounded-3xl p-4 sm:p-6">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-rose-500 text-white font-bold px-3 py-1 rounded-full text-xs sm:text-sm shadow-sm">🔴 DAY 5 • อาทิตย์ 27 ธ.ค.</span>
+                        <span class="font-bold text-rose-900 text-base sm:text-xl">Day Trip เมืองเทียนจิน (Tianjin)</span>
+                    </div>
+                    <span class="text-xl">🚄 ➔ 🎡 ➔ 🛳️</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-stretch">
+                    <div class="md:col-span-6 bg-white/85 rounded-2xl p-3.5 border border-rose-200">
+                        <div class="text-xs sm:text-sm font-bold text-rose-700 mb-2">🚇 เช็กลิสต์สถานที่ & การเดินทาง (ไป–กลับที่พัก)</div>
+                        <ul class="text-xs sm:text-sm text-stone-700 space-y-2 leading-relaxed">
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d5-t1" data-day="Day 5 (27 ธ.ค.)" data-title="นั่งรถไฟ CRH ไปเทียนจิน ➔ Tianjin Eye ➔ ย่านตึกยุโรป">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text"><b>ไปเทียนจิน:</b> สาย 4/14 ลง <b>Beijing South</b> ขึ้น CRH ลง <b>Tianjin Station (ทางออก South)</b> ➔ Tianjin Eye & ย่านยุโรป</span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d5-t2" data-day="Day 5 (27 ธ.ค.)" data-title="Italian Style Town ➔ ล่องเรือแม่น้ำไห่เหอ ➔ CRH กลับปักกิ่งเข้าที่พัก">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text"><b>ล่องเรือ & กลับที่พัก:</b> Italian Town ➔ ล่องเรือไห่เหอ ➔ CRH กลับ <i>Beijing South</i> ต่อสาย 4/14 กลับที่พัก</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="md:col-span-6 bg-white rounded-2xl p-3.5 border border-rose-200">
+                        <div class="text-xs sm:text-sm font-bold text-rose-600 mb-2">🍽️ เช็กลิสต์พิกัดของกินตามทาง</div>
+                        <ul class="text-xs sm:text-sm text-stone-700 space-y-2">
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d5-f1" data-day="Day 5 (27 ธ.ค.)" data-title="☕ Luckin Coffee (สถานี Beijing South)">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">☕ <b>เช้า:</b> Luckin Coffee (สถานี Beijing South)</span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d5-f2" data-day="Day 5 (27 ธ.ค.)" data-title="🥟 ซาลาเปา Goubuli (เมืองเทียนจิน)">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">🥟 <b>เที่ยง:</b> <b>ซาลาเปา Goubuli</b> (เทียนจิน)</span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d5-f3" data-day="Day 5 (27 ธ.ค.)" data-title="🍕 มื้อเย็น Italian Style Town / Nanchengxiang">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">🍕 <b>เย็น:</b> Italian Style Town / <i>มื้อดึกกลับปักกิ่ง: Nanchengxiang</i></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Visual Landmarks & Food Gallery Day 5 -->
+                <div class="mt-3.5 bg-white/95 rounded-2xl p-3 border border-rose-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-xs font-bold text-rose-800">📸 ภาพจำสถานที่ & อาหารเด่น (แตะที่รูปเพื่อใส่รูปจากเครื่อง)</div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <div onclick="triggerPhotoUpload('d5-p1')" class="photo-slot flex items-center gap-2.5 bg-blue-50/70 p-2 rounded-xl border border-blue-100 hover:border-blue-300 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d5-p1" src="https://commons.wikimedia.org/wiki/Special:FilePath/Tianjin_Eye_at_night.jpg?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/1E3A8A/DBEAFE?text=Tianjin+Eye';" alt="Tianjin Eye" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-blue-200">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">Tianjin Eye & ตึกยุโรป</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">ชิงช้าสวรรค์ยักษ์ตั้งคร่อมสะพานข้ามแม่น้ำไห่เหอ & อาคารสไตล์อิตาลี</div>
+                            </div>
+                        </div>
+                        <div onclick="triggerPhotoUpload('d5-p2')" class="photo-slot flex items-center gap-2.5 bg-amber-50/70 p-2 rounded-xl border border-amber-100 hover:border-amber-300 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d5-p2" src="https://commons.wikimedia.org/wiki/Special:FilePath/Goubuli_Baozi.jpg?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/92400E/FEF3C7?text=Goubuli+Baozi';" alt="Goubuli Baozi" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-amber-200">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">ซาลาเปาโก่วปู้หลี่ (Goubuli)</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">ซาลาเปาจีบ 18 กลีบในเข่งไม้ไผ่ แป้งนุ่มไส้หมูฉ่ำน้ำซุป</div>
+                            </div>
+                        </div>
+                        <div onclick="triggerPhotoUpload('d5-p3')" class="photo-slot flex items-center gap-2.5 bg-emerald-50/70 p-2 rounded-xl border border-emerald-100 hover:border-emerald-300 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d5-p3" src="https://commons.wikimedia.org/wiki/Special:FilePath/Tianjin_Italian_Style_Town_2013.jpg?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/065F46/ECFDF5?text=Italian+Town';" alt="Italian Style Town" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-emerald-200">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">ย่าน Italian Style Town</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">จัตุรัสสไตล์ยุโรปริมน้ำ พร้อมร้านพิซซ่าและพาสต้าบรรยากาศโรแมนติก</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-between single-day-nav">
+                    <button onclick="switchTab('day4')" class="bg-white hover:bg-rose-100 text-rose-800 border border-rose-300 text-xs sm:text-sm font-bold px-4 py-2 rounded-xl cursor-pointer">
+                        ⬅ ย้อนกลับ Day 4
+                    </button>
+                    <button onclick="switchTab('day6')" class="bg-rose-500 hover:bg-rose-600 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-xl shadow-sm cursor-pointer">
+                        ไปต่อ Day 6 (28 ธ.ค.) ➔
+                    </button>
+                </div>
+            </div>
+
+            <!-- DAY 6 -->
+            <div id="section-day6" class="day-section hidden cute-card bg-[#FEFCE8] border-2 border-[#FEF08A] rounded-3xl p-4 sm:p-6">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-amber-500 text-white font-bold px-3 py-1 rounded-full text-xs sm:text-sm shadow-sm">🟡 DAY 6 • จันทร์ 28 ธ.ค.</span>
+                        <span class="font-bold text-amber-900 text-base sm:text-xl">พระราชวังฤดูร้อน ➔ วัดลามะ ➔ โฮ่วไห่</span>
+                    </div>
+                    <span class="text-xl">🏞️ ➔ 🛕 ➔ 🥟</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-stretch">
+                    <div class="md:col-span-6 bg-white/85 rounded-2xl p-3.5 border border-amber-200">
+                        <div class="text-xs sm:text-sm font-bold text-amber-700 mb-2">🚇 เช็กลิสต์สถานที่ & การเดินทาง (ไป–กลับที่พัก)</div>
+                        <ul class="text-xs sm:text-sm text-stone-700 space-y-2 leading-relaxed">
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d6-t1" data-day="Day 6 (28 ธ.ค.)" data-title="พระราชวังฤดูร้อน (Summer Palace)">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text"><b>วังฤดูร้อน:</b> สาย 4 ลง <b>Beigongmen (ทางออก D)</b></span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d6-t2" data-day="Day 6 (28 ธ.ค.)" data-title="วัดลามะ (Yonghe Temple) ก่อนบ่าย 3">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text"><b>วัดลามะ:</b> สาย 4 ต่อ สาย 2 ลง <b>Yonghegong (ทางออก F)</b></span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d6-t3" data-day="Day 6 (28 ธ.ค.)" data-title="เดินเล่นทะเลสาบโฮ่วไห่ & ย่านหูท่ง ➔ นั่งสาย 8 กลับที่พัก">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text"><b>โฮ่วไห่ & กลับที่พัก:</b> สาย 2 ต่อ สาย 8 ลง <b>Shichahai (ทางออก A2)</b> ➔ ขากลับขึ้นสาย 8 กลับที่พัก</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="md:col-span-6 bg-white rounded-2xl p-3.5 border border-amber-200">
+                        <div class="text-xs sm:text-sm font-bold text-rose-600 mb-2">🍽️ เช็กลิสต์พิกัดของกินตามทาง</div>
+                        <ul class="text-xs sm:text-sm text-stone-700 space-y-2">
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d6-f1" data-day="Day 6 (28 ธ.ค.)" data-title="☕ Metal Hands Coffee">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">☕ <b>เช้า:</b> Metal Hands Coffee</span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d6-f2" data-day="Day 6 (28 ธ.ค.)" data-title="🥗 Green Tea 绿茶 (Star Street) / Sushiro (Xidan)">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">🥗 <b>เที่ยง:</b> <b>Green Tea 绿茶</b> (Star Street) / <i>Sushiro (Xidan)</i></span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d6-f3" data-day="Day 6 (28 ธ.ค.)" data-title="🥟 ติ่มซำ Jin Ding Xuan (金鼎轩) ติดวัดลามะ / บะหมี่ No.69">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">🥟 <b>เย็น:</b> <b>Jin Ding Xuan (金鼎轩)</b> ติดวัดลามะ / <i>บะหมี่ No.69</i></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Visual Landmarks & Food Gallery Day 6 -->
+                <div class="mt-3.5 bg-white/95 rounded-2xl p-3 border border-amber-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-xs font-bold text-amber-800">📸 ภาพจำสถานที่ & อาหารเด่น (แตะที่รูปเพื่อใส่รูปจากเครื่อง)</div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <div onclick="triggerPhotoUpload('d6-p1')" class="photo-slot flex items-center gap-2.5 bg-teal-50/70 p-2 rounded-xl border border-teal-100 hover:border-teal-300 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d6-p1" src="https://commons.wikimedia.org/wiki/Special:FilePath/Summer_Palace_Beijing_2017.jpg?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/115E59/CCFBF1?text=Summer+Palace';" alt="Summer Palace" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-teal-200">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">พระราชวังฤดูร้อน & วัดลามะ</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">หอพระพุทธกลิ่นหอมริมทะเลสาบคุนหมิง & วิหารทิเบตหลังคาทอง</div>
+                            </div>
+                        </div>
+                        <div onclick="triggerPhotoUpload('d6-p2')" class="photo-slot flex items-center gap-2.5 bg-lime-50/70 p-2 rounded-xl border border-lime-100 hover:border-lime-300 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d6-p2" src="https://commons.wikimedia.org/wiki/Special:FilePath/Yonghe_Temple_Beijing_2016.jpg?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/3F6212/ECFCCB?text=Lama+Temple';" alt="Yonghe Lama Temple" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-lime-200">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">วัดลามะ (Yonghe Temple)</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">วัดพุทธทิเบตชื่อดังของปักกิ่ง ขึ้นชื่อเรื่องการขอพรและเครื่องราง</div>
+                            </div>
+                        </div>
+                        <div onclick="triggerPhotoUpload('d6-p3')" class="photo-slot flex items-center gap-2.5 bg-amber-50/70 p-2 rounded-xl border border-amber-100 hover:border-amber-300 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d6-p3" src="https://commons.wikimedia.org/wiki/Special:FilePath/Dim_sum_in_bamboo_steamers.jpg?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/92400E/FFFBEB?text=Dim+Sum';" alt="Dim Sum" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-amber-200">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">ติ่มซำ Jin Ding Xuan</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">ฮะเก๋ากุ้ง ขนมจีบไข่กุ้ง ซาลาเปาลาวา เสิร์ฟร้อนในเข่งไม้</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-between single-day-nav">
+                    <button onclick="switchTab('day5')" class="bg-white hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs sm:text-sm font-bold px-4 py-2 rounded-xl cursor-pointer">
+                        ⬅ ย้อนกลับ Day 5
+                    </button>
+                    <button onclick="switchTab('day7')" class="bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-xl shadow-sm cursor-pointer">
+                        ไปต่อ Day 7 (29 ธ.ค.) ➔
+                    </button>
+                </div>
+            </div>
+
+            <!-- DAY 7 -->
+            <div id="section-day7" class="day-section hidden cute-card bg-[#FDF2F8] border-2 border-[#FBCFE8] rounded-3xl p-4 sm:p-6">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="bg-pink-500 text-white font-bold px-3 py-1 rounded-full text-xs sm:text-sm shadow-sm">🩷 DAY 7 • อังคาร 29 ธ.ค.</span>
+                        <span class="font-bold text-pink-900 text-base sm:text-xl">ช้อปของฝากตงจื๋อเหมิน ➔ บินกลับ</span>
+                    </div>
+                    <span class="text-xl">🛍️ ➔ 🥘 ➔ 🛫</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-stretch">
+                    <div class="md:col-span-6 bg-white/85 rounded-2xl p-3.5 border border-pink-200">
+                        <div class="text-xs sm:text-sm font-bold text-pink-700 mb-2">🚇 เช็กลิสต์สถานที่ & การเดินทาง (เช็กเอาต์ ➔ สนามบิน)</div>
+                        <ul class="text-xs sm:text-sm text-stone-700 space-y-2 leading-relaxed">
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d7-t1" data-day="Day 7 (29 ธ.ค.)" data-title="เช็กเอาต์ที่พัก ➔ ช้อปปิ้งของฝากย่านตงจื๋อเหมิน (Raffles City)">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text"><b>ออกจากที่พัก:</b> เช็กเอาต์พร้อมกระเป๋า สาย 2/13 ลง <b>Dongzhimen (ทางออก D)</b> ช้อปของฝาก Raffles City</span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d7-t2" data-day="Day 7 (29 ธ.ค.)" data-title="นั่ง Airport Express ไปสนามบิน PEK ➔ บินกลับกรุงเทพฯ">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text"><b>ไปสนามบิน:</b> เดินเชื่อมชั้นใต้ดินเข้า <b>Airport Express</b> ตรงสู่ PEK (T2/T3) บินกลับ!</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="md:col-span-6 bg-white rounded-2xl p-3.5 border border-pink-200">
+                        <div class="text-xs sm:text-sm font-bold text-rose-600 mb-2">🍽️ เช็กลิสต์พิกัดของกิน & ของฝากส่งท้าย</div>
+                        <ul class="text-xs sm:text-sm text-stone-700 space-y-2">
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d7-f1" data-day="Day 7 (29 ธ.ค.)" data-title="☕ Seesaw Coffee Downtown">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">☕ <b>เช้า:</b> Seesaw Coffee Downtown</span>
+                            </li>
+                            <li class="check-item flex items-start gap-2 p-1.5 rounded-lg" data-id="d7-f2" data-day="Day 7 (29 ธ.ค.)" data-title="🥘 Feidachu (费大厨) ห้าง Raffles City ตงจื๋อเหมิน & ซื้อกล่องโยเกิร์ต/ขนมฝาก">
+                                <span class="check-box text-xs"></span>
+                                <span class="item-text">🥘 <b>เที่ยง/ของฝาก:</b> <b>Feidachu (费大厨)</b> ห้าง Raffles City ตงจื๋อเหมิน (แวะซื้อโยเกิร์ต <b>Ziguangyuan</b> / ขนม <b>Daoxiangcun</b> ก่อนขึ้นรถไฟไปสนามบิน)</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Visual Landmarks & Food Gallery Day 7 -->
+                <div class="mt-3.5 bg-white/95 rounded-2xl p-3 border border-pink-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="text-xs font-bold text-pink-800">📸 ภาพจำสถานที่ & อาหารเด่น (แตะที่รูปเพื่อใส่รูปจากเครื่อง)</div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <div onclick="triggerPhotoUpload('d7-p1')" class="photo-slot flex items-center gap-2.5 bg-indigo-50/70 p-2 rounded-xl border border-indigo-100 hover:border-indigo-300 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d7-p1" src="https://commons.wikimedia.org/wiki/Special:FilePath/Raffles_City_Beijing_(20180923163912).jpg?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/312E81/E0E7FF?text=Raffles+City';" alt="Raffles City Dongzhimen" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-indigo-200">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">Raffles City ตงจื๋อเหมิน</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">ตึกแฝดกระจกเชื่อมตรงสถานี Airport Express ช้อปของฝากก่อนบิน</div>
+                            </div>
+                        </div>
+                        <div onclick="triggerPhotoUpload('d7-p2')" class="photo-slot flex items-center gap-2.5 bg-red-50/70 p-2 rounded-xl border border-red-100 hover:border-red-300 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d7-p2" src="https://commons.wikimedia.org/wiki/Special:FilePath/Hunan_fried_pork_with_chili.jpg?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/991B1B/FEF2F2?text=Feidachu+Pork';" alt="Hunan Chili Pork" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-red-200">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">หมูผัดพริกเชฟเฟย (Feidachu)</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">กระทะร้อนหมูผัดพริกหยวกเขียวหอมฉุย เสิร์ฟข้าวสวยยกหม้อหุง</div>
+                            </div>
+                        </div>
+                        <div onclick="triggerPhotoUpload('d7-p3')" class="photo-slot flex items-center gap-2.5 bg-amber-50/70 p-2 rounded-xl border border-amber-100 hover:border-amber-300 transition">
+                            <div class="relative flex-shrink-0">
+                                <img id="img-d7-p3" src="https://commons.wikimedia.org/wiki/Special:FilePath/Beijing_Capital_International_Airport_T3.jpg?width=300" onerror="this.onerror=null;this.src='https://placehold.co/150x150/92400E/FFFBEB?text=PEK+Airport';" alt="Beijing Capital Airport" class="w-16 h-16 rounded-xl object-cover shadow-xs border border-amber-200">
+                                <span class="photo-badge absolute -bottom-1 -right-1 bg-white text-stone-700 text-[10px] px-1.5 py-0.5 rounded-full shadow border border-stone-200 transition">📷</span>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-stone-800">สนามบินปักกิ่ง (PEK)</div>
+                                <div class="text-[11px] text-stone-600 leading-tight">อาคารผู้โดยสารหลังคาโค้งสีทอง เตรียมโหลดของฝากขึ้นเครื่องกลับไทย</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-between single-day-nav">
+                    <button onclick="switchTab('day6')" class="bg-white hover:bg-pink-100 text-pink-800 border border-pink-300 text-xs sm:text-sm font-bold px-4 py-2 rounded-xl cursor-pointer">
+                        ⬅ ย้อนกลับ Day 6
+                    </button>
+                    <button onclick="switchTab('history')" class="bg-rose-500 hover:bg-rose-600 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-xl shadow-sm cursor-pointer">
+                        ดูสรุป History 📜
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Bonus / Extra Footer Box (Shown in 'all' or 'day3'/'day6' or 'history') -->
+        <div id="section-bonus" class="mt-5 bg-amber-100/80 border-2 border-dashed border-amber-400 rounded-3xl p-4 relative z-10">
+            <div class="flex items-center gap-2 font-bold text-amber-900 text-xs sm:text-base mb-1.5">
+                <span>🍲 ภารกิจพิเศษ (ถ้ามีเวลาเหลือ): หม้อไฟเนื้อแกะ 南门涮肉 (Nanmen Hotpot) & ร้านโต้วจือมิชลิน</span>
+            </div>
+            <div class="check-item flex items-start gap-2 p-1.5 rounded-xl bg-white/70 border border-amber-300" data-id="bonus-hotpot" data-day="Bonus Mission" data-title="🍲 ภารกิจพิเศษ: หม้อไฟเนื้อแกะ 南门涮肉 (Nanmen Hotpot) / Yisan Douzhi">
+                <span class="check-box text-xs"></span>
+                <p class="item-text text-xs sm:text-sm text-amber-900 leading-relaxed">
+                    • <b>จุดแทรกที่ 1 (โซนเฉียนเหมิน / เทียนถาน):</b> แวะทาน <b>Nanmen Hotpot</b> สาขาหอสักการะฟ้าเทียนถาน, <b>XI YUAN JU (玺源居)</b> หรือลองน้ำถั่วเขียวหมักมิชลิน <b>Yisan Douzhi (尹三豆汁)</b><br>
+                    • <b>จุดแทรกที่ 2 (ค่ำ Day 6):</b> เดินเล่นย่านโฮ่วไห่เสร็จแล้ว แวะทาน <b>Nanmen Hotpot สาขาโฮ่วไห่ (后海店)</b> ริมทะเลสาบได้เลย!
+                </p>
+            </div>
+        </div>
+
+        <!-- HISTORY SECTION -->
+        <div id="section-history" class="hidden mt-5 bg-white border-2 border-rose-200 rounded-3xl p-4 sm:p-5 shadow-sm relative z-10">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3 border-b border-rose-100 pb-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">📜</span>
+                    <h2 class="font-bold text-rose-900 text-base sm:text-lg">Travel & Food History (บันทึกที่ไปเช็กอินมาแล้ว)</h2>
+                </div>
+                <span id="history-badge" class="bg-rose-100 text-rose-700 text-xs font-bold px-3 py-1 rounded-full">
+                    เช็กอินแล้ว 0 รายการ
+                </span>
+            </div>
+
+            <!-- Empty State -->
+            <div id="history-empty" class="text-center py-8 text-stone-400 text-xs sm:text-sm">
+                <p class="text-2xl mb-2">🐼✨</p>
+                <p class="font-medium text-stone-600">ยังไม่มีประวัติการเช็กอินในตอนนี้</p>
+                <p class="mt-1">ลองเลือกแท็บ Day 1–7 แล้วแตะที่ช่องสี่เหลี่ยมหน้าสถานที่หรือร้านอาหาร รายการที่ไปแล้วจะถูกบันทึกมาโชว์ที่นี่อัตโนมัติ!</p>
+            </div>
+
+            <!-- Populated History List -->
+            <div id="history-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 hidden">
+            </div>
+        </div>
+
+        <!-- Bottom Signature -->
+        <div class="text-center mt-5 text-[11px] text-stone-400 font-medium">
+            ✨ Have a Safe & Yummy Trip in Beijing! • 祝你北京之旅愉快 ✨
+        </div>
+
+    </div>
+
+    <!-- Custom Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-stone-800 text-white px-4 py-3 rounded-2xl shadow-lg text-sm font-medium opacity-0 pointer-events-none transition-opacity duration-300 z-50">
+        กำลังดำเนินการ...
+    </div>
+
+    <!-- Hidden File Input for Custom Photo Upload -->
+    <input type="file" id="custom-photo-input" accept="image/*" class="hidden">
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // วางค่า firebaseConfig ตรงนี้หากต้องการซิงก์ออนไลน์บน GitHub Pages (ถ้าไม่ใส่จะเก็บข้อมูลในเครื่องอัตโนมัติ)
+        const manualFirebaseConfig = null;
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'beijing-trip-shared';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : manualFirebaseConfig;
+
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        let useCloud = false;
+        let checkedState = JSON.parse(localStorage.getItem('beijing_trip_checklist_v1') || '{}');
+        let customPhotos = JSON.parse(localStorage.getItem('beijing_trip_photos_v1') || '{}');
+        let activePhotoSlotId = null;
+
+        // Trigger Photo Picker from Device
+        window.triggerPhotoUpload = function(slotId) {
+            activePhotoSlotId = slotId;
+            const input = document.getElementById('custom-photo-input');
+            input.value = '';
+            input.click();
+        };
+
+        // Compress and Save Selected Photo
+        document.getElementById('custom-photo-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file || !activePhotoSlotId) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const maxSize = 320;
+                    let w = img.width;
+                    let h = img.height;
+                    if (w > h && w > maxSize) {
+                        h = Math.round((h * maxSize) / w);
+                        w = maxSize;
+                    } else if (h > maxSize) {
+                        w = Math.round((w * maxSize) / h);
+                        h = maxSize;
+                    }
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.78);
+                    customPhotos[activePhotoSlotId] = compressedDataUrl;
+                    try {
+                        localStorage.setItem('beijing_trip_photos_v1', JSON.stringify(customPhotos));
+                        const imgEl = document.getElementById('img-' + activePhotoSlotId);
+                        if (imgEl) imgEl.src = compressedDataUrl;
+                        showToast('📸 เปลี่ยนรูปภาพเรียบร้อยแล้ว!');
+                    } catch (err) {
+                        showToast('⚠️ พื้นที่เก็บภาพเต็ม กรุณารีเซ็ตบางรูป');
+                    }
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function applySavedPhotos() {
+            Object.keys(customPhotos).forEach(slotId => {
+                const imgEl = document.getElementById('img-' + slotId);
+                if (imgEl && customPhotos[slotId]) {
+                    imgEl.src = customPhotos[slotId];
+                }
+            });
+        }
+
+        // Tab Switching Logic
+        window.switchTab = function(tabName) {
+            const allSections = document.querySelectorAll('.day-section');
+            const historySection = document.getElementById('section-history');
+            const bonusSection = document.getElementById('section-bonus');
+            const singleNavs = document.querySelectorAll('.single-day-nav');
+
+            // Update Tab Button Styles
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                const isTarget = btn.dataset.tab === tabName;
+                btn.classList.remove('active', 'bg-emerald-500', 'bg-orange-500', 'bg-sky-500', 'bg-purple-500', 'bg-rose-500', 'bg-amber-500', 'bg-pink-500', 'bg-stone-700', 'text-white');
+                if (!isTarget) {
+                    btn.classList.add('bg-white');
+                    if (btn.dataset.tab === 'history') {
+                        btn.classList.add('text-rose-700');
+                    } else {
+                        btn.classList.add('text-stone-700');
+                    }
+                } else {
+                    btn.classList.remove('bg-white', 'text-stone-700', 'text-rose-700');
+                    btn.classList.add('active', 'text-white');
+                    const colorMap = {
+                        day1: 'bg-emerald-500',
+                        day2: 'bg-orange-500',
+                        day3: 'bg-sky-500',
+                        day4: 'bg-purple-500',
+                        day5: 'bg-rose-500',
+                        day6: 'bg-amber-500',
+                        day7: 'bg-pink-500',
+                        history: 'bg-rose-500',
+                        all: 'bg-stone-700'
+                    };
+                    btn.classList.add(colorMap[tabName] || 'bg-rose-500');
+                }
+            });
+
+            // Show/Hide Content Sections
+            if (tabName === 'all') {
+                allSections.forEach(sec => sec.classList.remove('hidden'));
+                historySection.classList.remove('hidden');
+                bonusSection.classList.remove('hidden');
+                singleNavs.forEach(nav => nav.classList.add('hidden'));
+            } else if (tabName === 'history') {
+                allSections.forEach(sec => sec.classList.add('hidden'));
+                historySection.classList.remove('hidden');
+                bonusSection.classList.remove('hidden');
+            } else {
+                allSections.forEach(sec => {
+                    if (sec.id === 'section-' + tabName) {
+                        sec.classList.remove('hidden');
+                    } else {
+                        sec.classList.add('hidden');
+                    }
+                });
+                historySection.classList.add('hidden');
+                bonusSection.classList.toggle('hidden', tabName !== 'day3' && tabName !== 'day6');
+                singleNavs.forEach(nav => nav.classList.remove('hidden'));
+            }
+        };
+
+        function setSyncStatus(mode, text) {
+            const dot = document.getElementById('sync-dot');
+            const label = document.getElementById('sync-status');
+            if (mode === 'cloud') {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
+            } else {
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500';
+            }
+            label.textContent = text;
+        }
+
+        async function initApp() {
+            if (!firebaseConfig) {
+                setSyncStatus('local', 'พร้อมใช้งาน (บันทึกเช็กลิสต์ลงเครื่องอัตโนมัติ)');
+                return;
+            }
+
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                currentUser = auth.currentUser;
+                if (!currentUser) return;
+
+                useCloud = true;
+                document.getElementById('user-id-display').textContent = currentUser.uid.slice(0, 8) + '...';
+                setSyncStatus('cloud', 'ซิงก์ออนไลน์กับเพื่อนแบบเรียลไทม์แล้ว');
+
+                const sharedColRef = collection(db, 'artifacts', appId, 'public', 'data', 'beijing_checklist');
+                onSnapshot(sharedColRef, (snapshot) => {
+                    const updatedState = {};
+                    snapshot.forEach((docSnap) => {
+                        updatedState[docSnap.id] = docSnap.data();
+                    });
+                    checkedState = updatedState;
+                    localStorage.setItem('beijing_trip_checklist_v1', JSON.stringify(checkedState));
+                    renderChecklistAndHistory();
+                }, (error) => {
+                    console.error('Sync listener error:', error);
+                    useCloud = false;
+                    setSyncStatus('local', 'โหมดออฟไลน์ (บันทึกในเครื่อง)');
+                });
+
+            } catch (err) {
+                console.error('Initialization error:', err);
+                useCloud = false;
+                setSyncStatus('local', 'พร้อมใช้งาน (บันทึกลงเครื่องอัตโนมัติ)');
+            }
+        }
+
+        function renderChecklistAndHistory() {
+            const items = document.querySelectorAll('.check-item');
+            const totalItems = items.length;
+            let checkedCount = 0;
+            const historyEntries = [];
+
+            items.forEach(item => {
+                const id = item.dataset.id;
+                const box = item.querySelector('.check-box');
+                
+                if (checkedState[id]) {
+                    item.classList.add('checked');
+                    box.innerHTML = '✓';
+                    checkedCount++;
+                    historyEntries.push({
+                        id: id,
+                        day: item.dataset.day,
+                        title: item.dataset.title,
+                        time: checkedState[id].time || Date.now()
+                    });
+                } else {
+                    item.classList.remove('checked');
+                    box.innerHTML = '';
+                }
+            });
+
+            const percent = totalItems > 0 ? Math.round((checkedCount / totalItems) * 100) : 0;
+            document.getElementById('progress-bar').style.width = percent + '%';
+            document.getElementById('progress-text').textContent = `${checkedCount}/${totalItems} (${percent}%)`;
+            document.getElementById('history-badge').textContent = `เช็กอินแล้ว ${checkedCount} รายการ`;
+            document.getElementById('tab-history-count').textContent = checkedCount;
+
+            const historyEmpty = document.getElementById('history-empty');
+            const historyList = document.getElementById('history-list');
+
+            if (historyEntries.length === 0) {
+                historyEmpty.classList.remove('hidden');
+                historyList.classList.add('hidden');
+                historyList.innerHTML = '';
+            } else {
+                historyEmpty.classList.add('hidden');
+                historyList.classList.remove('hidden');
+                historyEntries.sort((a, b) => b.time - a.time);
+
+                historyList.innerHTML = historyEntries.map(entry => {
+                    const dateObj = new Date(entry.time);
+                    const timeStr = dateObj.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+                    return `
+                        <div class="flex items-start justify-between gap-2 bg-rose-50/70 border border-rose-200 rounded-2xl p-2.5">
+                            <div class="flex items-start gap-2">
+                                <span class="text-emerald-600 font-bold text-sm mt-0.5">✅</span>
+                                <div>
+                                    <div class="text-[11px] font-bold text-rose-600">${entry.day} • เช็กอินเมื่อ ${timeStr} น.</div>
+                                    <div class="text-xs sm:text-sm font-medium text-stone-800">${entry.title}</div>
+                                </div>
+                            </div>
+                            <button onclick="uncheckItem('${entry.id}')" title="ยกเลิกเช็กอิน" class="text-stone-400 hover:text-rose-500 text-xs px-1.5 py-0.5 rounded-lg hover:bg-white transition cursor-pointer">
+                                ✕
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        async function toggleItem(item) {
+            const id = item.dataset.id;
+            const isCurrentlyChecked = !!checkedState[id];
+
+            // Optimistic Local Update
+            if (isCurrentlyChecked) {
+                delete checkedState[id];
+                showToast('ยกเลิกการเช็กอินแล้ว');
+            } else {
+                checkedState[id] = {
+                    time: Date.now(),
+                    title: item.dataset.title,
+                    day: item.dataset.day
+                };
+                showToast('🎉 เช็กอินสำเร็จ! บันทึกเข้า History แล้ว');
+            }
+            localStorage.setItem('beijing_trip_checklist_v1', JSON.stringify(checkedState));
+            renderChecklistAndHistory();
+
+            // Cloud Sync if configured
+            if (useCloud && currentUser && db) {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'beijing_checklist', id);
+                try {
+                    if (isCurrentlyChecked) {
+                        await deleteDoc(docRef);
+                    } else {
+                        await setDoc(docRef, {
+                            ...checkedState[id],
+                            checkedBy: currentUser.uid
+                        });
+                    }
+                } catch (e) {
+                    console.error('Cloud sync error:', e);
+                }
+            }
+        }
+
+        window.uncheckItem = async function(id) {
+            delete checkedState[id];
+            localStorage.setItem('beijing_trip_checklist_v1', JSON.stringify(checkedState));
+            renderChecklistAndHistory();
+            showToast('ลบรายการออกจาก History แล้ว');
+
+            if (useCloud && currentUser && db) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'beijing_checklist', id);
+                    await deleteDoc(docRef);
+                } catch (e) {
+                    console.error('Cloud remove error:', e);
+                }
+            }
+        };
+
+        window.openResetModal = function() {
+            const modal = document.getElementById('reset-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        };
+
+        window.closeResetModal = function() {
+            const modal = document.getElementById('reset-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        window.confirmResetChecklist = async function() {
+            closeResetModal();
+            const keys = Object.keys(checkedState);
+            checkedState = {};
+            localStorage.removeItem('beijing_trip_checklist_v1');
+            renderChecklistAndHistory();
+            showToast('🔄 รีเซ็ตเช็กลิสต์ทั้งหมดเรียบร้อย');
+
+            if (useCloud && currentUser && db) {
+                try {
+                    await Promise.all(keys.map(id => 
+                        deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'beijing_checklist', id))
+                    ));
+                } catch (e) {
+                    console.error('Cloud reset error:', e);
+                }
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.check-item').forEach(item => {
+                item.addEventListener('click', () => toggleItem(item));
+            });
+            applySavedPhotos();
+            switchTab('day1');
+            renderChecklistAndHistory();
+            initApp();
+        });
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.remove('opacity-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+            }, 2200);
+        }
+
+        window.downloadPoster = function() {
+            const btn = document.getElementById('downloadBtn');
+            const poster = document.getElementById('poster-area');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳ กำลังบันทึก...</span>';
+            showToast('กำลังสร้างรูปภาพ PNG...');
+
+            html2canvas(poster, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: '#FFF8F0'
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Beijing-Travel-Plan.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                btn.disabled = false;
+                btn.innerHTML = '<span>📸 บันทึกภาพหน้านี้ (PNG)</span>';
+                showToast('✅ บันทึกรูปภาพเรียบร้อยแล้ว!');
+            }).catch(err => {
+                console.error(err);
+                btn.disabled = false;
+                btn.innerHTML = '<span>📸 บันทึกภาพหน้านี้ (PNG)</span>';
+                showToast('❌ เกิดข้อผิดพลาดในการบันทึกภาพ');
+            });
+        };
+    </script>
+</body>
+</html>
